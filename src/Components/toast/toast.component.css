@@ -1,0 +1,30 @@
+.toast-container {
+    animation: moveIn 0.3s ease-in-out forwards;
+  }
+  
+  @keyframes moveIn {
+    0% {
+      right: -100%;
+      opacity: 0;
+    }
+    100% {
+      right: 0;
+      opacity: 1;
+    }
+  }
+  
+  .toast-container.exit {
+    animation: moveOut 0.3s ease-in-out forwards;
+  }
+  
+  @keyframes moveOut {
+    0% {
+      right: 0;
+      opacity: 1;
+    }
+    100% {
+      right: -100%;
+      opacity: 0;
+    }
+  }
+  

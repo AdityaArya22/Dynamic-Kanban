@@ -1,0 +1,330 @@
+/* Main container styling */
+.kanban-container {
+  background-color: #edf0f5 !important;
+  min-height: 100vh;
+  padding: 2rem;
+  box-shadow: inset 0 0 30px rgba(0,0,0,0.05);
+}
+
+.kanban-title {
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.15);
+}
+
+/* Stage card styling */
+.stage-card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05);
+  transition: transform 0.2s ease;
+  overflow: hidden;
+  height: 100%;
+  background-color: #f8f9fa;
+  outline: 1px solid rgba(0,0,0,0.05);
+}
+
+.stage-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,0,0,0.08);
+}
+
+.stage-header {
+  border-radius: 8px 8px 0 0;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 1rem !important;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Extended color scheme for stage headers */
+.stage-header-0 {
+  background: linear-gradient(135deg, #4b6cb7, #182848);
+}
+
+.stage-header-1 {
+  background: linear-gradient(135deg, #1d976c, #2a5298);
+}
+
+.stage-header-2 {
+  background: linear-gradient(135deg, #8e44ad, #614385);
+}
+
+.stage-header-3 {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+
+.stage-header-4 {
+  background: linear-gradient(135deg, #f39c12, #d35400);
+}
+
+.stage-header-5 {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+}
+
+.stage-header-6 {
+  background: linear-gradient(135deg, #16a085, #27ae60);
+}
+
+.stage-header-7 {
+  background: linear-gradient(135deg, #9b59b6, #8e44ad);
+}
+
+.stage-header-8 {
+  background: linear-gradient(135deg, #34495e, #2c3e50);
+}
+
+.stage-header-9 {
+  background: linear-gradient(135deg, #f1c40f, #f39c12);
+}
+
+/* For stages beyond 10, we cycle through different hues */
+.stage-header-10 {
+  background: linear-gradient(135deg, #00b894, #00a885);
+}
+
+.stage-header-11 {
+  background: linear-gradient(135deg, #fd79a8, #e84393);
+}
+
+.stage-header-12 {
+  background: linear-gradient(135deg, #6c5ce7, #5758BB);
+}
+
+.stage-header-13 {
+  background: linear-gradient(135deg, #fdcb6e, #f6b93b);
+}
+
+.stage-header-14 {
+  background: linear-gradient(135deg, #0984e3, #0069d9);
+}
+
+.stage-body {
+  background-color: #f0f2f5;
+  padding: 1.25rem;
+  border-radius: 0 0 8px 8px;
+  border-top: 1px solid rgba(0,0,0,0.03);
+}
+
+/* Task list styling */
+.task-list {
+  min-height: 350px;
+  padding: 0.5rem;
+  background-color: rgba(255,255,255,0.4);
+  border-radius: 8px;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.03);
+}
+
+/* Task item styling */
+.task-item {
+  background-color: white;
+  border-radius: 8px;
+  border: none;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.02);
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  transition: all 0.2s ease;
+  position: relative;
+  border-left: 4px solid #677bab;
+}
+
+.task-item:hover {
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.03);
+  transform: translateY(-2px);
+}
+
+.task-title {
+  font-size: 1.1rem;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.task-description {
+  color: #5d6778;
+  font-size: 0.9rem;
+}
+
+/* Priority badges */
+.priority-badge-high {
+  background-color: #e74c3c;
+  padding: 0.4rem 0.8rem;
+  font-weight: 500;
+  box-shadow: 0 2px 5px rgba(231, 76, 60, 0.3);
+}
+
+.priority-badge-medium {
+  background-color: #f39c12;
+  padding: 0.4rem 0.8rem;
+  font-weight: 500;
+  box-shadow: 0 2px 5px rgba(243, 156, 18, 0.3);
+}
+
+.priority-badge-low {
+  background-color: #27ae60;
+  padding: 0.4rem 0.8rem;
+  font-weight: 500;
+  box-shadow: 0 2px 5px rgba(39, 174, 96, 0.3);
+}
+
+/* Task action buttons */
+.edit-btn {
+  background-color: #f1c40f;
+  border: none;
+  color: white;
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+  box-shadow: 0 2px 5px rgba(241, 196, 15, 0.3);
+}
+
+.delete-btn {
+  background-color: #e74c3c;
+  border: none;
+  color: white;
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+  box-shadow: 0 2px 5px rgba(231, 76, 60, 0.3);
+}
+
+/* Empty placeholder styling */
+.empty-placeholder {
+  background-color: rgba(255,255,255,0.7);
+  border: 2px dashed #b8c2cc;
+  border-radius: 8px;
+  padding: 2rem 1rem;
+  text-align: center;
+  color: #7f8c8d;
+  box-shadow: inset 0 0 15px rgba(0,0,0,0.03);
+}
+
+/* Floating action button */
+.floating-action-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4), 0 0 0 1px rgba(52, 152, 219, 0.1);
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  border: none;
+  z-index: 1000;
+}
+
+.floating-action-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(52, 152, 219, 0.5), 0 0 0 1px rgba(52, 152, 219, 0.1);
+}
+
+/* Custom modal styling */
+.custom-modal {
+  background-color: rgba(0,0,0,0.7);
+}
+
+.custom-modal-content {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3), 0 0 0 1px rgba(0,0,0,0.05);
+  overflow: hidden;
+}
+
+.custom-modal-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #eaeaea;
+  padding: 1.25rem;
+}
+
+.custom-modal-body {
+  padding: 1.5rem;
+  background-color: white;
+}
+
+.custom-modal-footer {
+  border-top: 1px solid #eaeaea;
+  padding: 1.25rem;
+  background-color: #f8f9fa;
+}
+
+/* Form controls */
+.custom-input, 
+.custom-textarea, 
+.custom-select {
+  border: 1px solid #dde1e5;
+  border-radius: 6px;
+  padding: 0.75rem;
+  transition: all 0.2s ease;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.07);
+  background-color: #fcfcfc;
+}
+
+.custom-input:focus, 
+.custom-textarea:focus, 
+.custom-select:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2), inset 0 2px 5px rgba(0,0,0,0.03);
+  outline: none;
+  background-color: white;
+}
+
+/* Button styling */
+.custom-btn-save {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  border: none;
+  box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.custom-btn-save:hover {
+  box-shadow: 0 6px 15px rgba(52, 152, 219, 0.4);
+  transform: translateY(-2px);
+}
+
+.custom-btn-cancel {
+  border-radius: 6px;
+  font-weight: 500;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.custom-btn-cancel:hover {
+  background-color: #a0a1a2;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+}
+
+/* Due date styling */
+.due-date {
+  background-color: #ecf0f1;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+  border: 1px solid rgba(0,0,0,0.03);
+}
+
+/* Custom borders and accents for task items */
+.task-item[data-priority="High"] {
+  border-left: 4px solid #e74c3c;
+}
+
+.task-item[data-priority="Medium"] {
+  border-left: 4px solid #f39c12;
+}
+
+.task-item[data-priority="Low"] {
+  border-left: 4px solid #27ae60;
+}
+
+/* Additional styling for better contrast */
+.row.g-4 {
+  margin-left: -1rem;
+  margin-right: -1rem;
+}
+
+.col-md-4 {
+  padding: 1rem;
+}
