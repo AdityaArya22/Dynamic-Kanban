@@ -9,14 +9,14 @@
   </button>
 
   @if(showTaskForm) {
-    <div class="modal fade show d-block custom-modal" tabindex="-1">
+    <div class="modal  fade show d-block custom-modal" tabindex="-1">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content custom-modal-content">
-          <div class="modal-header custom-modal-header">
+          <div class="modal-header  bg-dark text-white custom-modal-header">
             <h5 class="modal-title">{{ isEdit ? "✏️ Edit Task" : "📌 New Task" }}</h5>
             <button class="btn-close" (click)="closeTaskForm()"></button>
           </div>
-          <div class="modal-body custom-modal-body">
+          <div class="modal-body bg-dark text-white custom-modal-body">
             <form>
               <!-- Task Title -->
               <div class="mb-3">
@@ -61,7 +61,7 @@
               </div>
   
               <!-- Allowed Transitions -->
-              <div class="mb-3">
+              <div class="mb-3 ">
                 <label class="form-label fw-bold">Allowed Transitions</label>
                 <div class="row">
                   @for(stage of stages; track $index) {
@@ -88,7 +88,7 @@
           </div>
   
           <!-- Modal Footer -->
-          <div class="modal-footer custom-modal-footer">
+          <div class="modal-footer bg-dark text-white custom-modal-footer">
             <button class="btn btn-outline-secondary custom-btn-cancel" (click)="closeTaskForm()">Cancel</button>
             <button class="btn btn-success px-4 custom-btn-save" (click)="addOrUpdateTask()">
               {{ isEdit ? "Update" : "Save" }}
@@ -137,8 +137,16 @@
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="me-1" viewBox="0 0 16 16">
                         <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
                       </svg>
-                      <span>{{ task.dueDate || 'No Due Date' }}</span>
+                      
+                      <span class="me-2">{{ task.dueDate ? (task.dueDate | date: 'dd/MM/yyyy') : 'No Due Date' }}</span>
+                    
+                     @if(task.dueDate){
+                      <span  class="badge px-3 py-1" [class]="getBadgeClass(task.dueDate)">
+                        {{ getDueStatus(task.dueDate) }}
+                      </span>
+                     }
                     </div>
+                    
                     
                     <!-- Actions -->
                     <div class="d-flex justify-content-end mt-3 task-actions">

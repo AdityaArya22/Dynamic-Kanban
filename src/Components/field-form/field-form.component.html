@@ -4,49 +4,46 @@
       <div class="card p-4 shadow-lg rounded">
         <h3 class="text-center mb-4">📌 Create Your Kanban Fields</h3>
 
-        <label class="form-label fw-bold">Enter Number of Fields:</label>
-        <input type="number" class="form-control" [(ngModel)]="numCount" min="1" placeholder="Number of fields">
-        <button class="btn btn-primary w-100 mt-3" (click)="generateFields()" [disabled]="numCount < 1">Next</button>
+        <!-- Instead of an input, just show a text label -->
+        <p class="fw-bold text-center">You can create only **one** field.</p>
       </div>
     </div>
   </div>
 
   <div class="mt-4">
-    @if(numCount > 0) {
-      <div class="row justify-content-center">
-        <div class="col-md-6">
-          <div class="card p-4 shadow-lg rounded">
-            <h5 class="text-center mb-3">✏️ Enter Field Names</h5>
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="card p-4 shadow-lg rounded">
+          <h5 class="text-center mb-3">✏️ Enter Field Name</h5>
 
-            @for(item of fields; track $index) {
-              <div class="mb-3">
-                <input type="text" [(ngModel)]="fields[$index].fieldName" class="form-control" placeholder="Enter field name">
-                <button class="btn btn-outline-primary mt-2 w-100" (click)="proceedToStages($index)">➕ Add Stages</button>
-              </div>
-            }
-
-            @if(showStages) {
-              <h5 class="mt-4 text-center">📌 Stages for: <b>{{ fields[currentFieldIndex]?.fieldName }}</b></h5>
-
-              <!-- Stage Count Input -->
-              <label class="form-label">Enter Number of Stages:</label>
-              <input type="number" [(ngModel)]="stageCount" class="form-control">
-              <button class="btn btn-secondary w-100 mt-2" (click)="setStageCount()" [disabled]="stageCount < 1">Next</button>
-
-              <!-- Stage Name Inputs (Only after Next is clicked) -->
-              @if(stageInputVisible) {
-                @for(item of fields[currentFieldIndex].stages; track $index) {
-                  <input type="text" class="form-control my-2" placeholder="Enter stage name" [(ngModel)]="fields[currentFieldIndex].stages[$index]">
-                }
-                <button class="btn btn-warning w-100 mt-2" (click)="saveStages()">✅ Save Stages</button>
-              }
-            }
-
-            <button class="btn btn-success w-100 mt-3" (click)="saveFields()" 
-              [disabled]="!allFieldsFilled() || !allStagesFilled()">💾 Save All</button>
+          <!-- Single Field Input -->
+          <div class="mb-3">
+            <input type="text" name="field" [(ngModel)]="fields[0].fieldName" class="form-control" placeholder="Enter field name">
+            <button class="btn btn-outline-primary mt-2 w-100" (click)="proceedToStages(0)">➕ Add Stages</button>
           </div>
+
+          <!-- Stages Section -->
+          @if(showStages) {
+            <h5 class="mt-4 text-center">📌 Stages for: <b>{{ fields[currentFieldIndex]?.fieldName }}</b></h5>
+
+            <!-- Stage Count Input -->
+            <label class="form-label">Enter Number of Stages:</label>
+            <input type="number" name="stageCount" [(ngModel)]="stageCount" class="form-control">
+            <button class="btn btn-secondary w-100 mt-2" (click)="setStageCount()" [disabled]="stageCount < 1">Next</button>
+
+            <!-- Stage Name Inputs -->
+            @if(stageInputVisible) {
+              @for(item of fields[currentFieldIndex].stages; track $index) {
+                <input type="text" name="fileds" class="form-control my-2" placeholder="Enter stage name" [(ngModel)]="fields[currentFieldIndex].stages[$index]">
+              }
+              <button class="btn btn-warning w-100 mt-2" (click)="saveStages()">✅ Save Stages</button>
+            }
+          }
+
+          <button class="btn btn-success w-100 mt-3" (click)="saveFields()" 
+            [disabled]="!allFieldsFilled() || !allStagesFilled()">💾 Save</button>
         </div>
       </div>
-    }
+    </div>
   </div>
 </div>

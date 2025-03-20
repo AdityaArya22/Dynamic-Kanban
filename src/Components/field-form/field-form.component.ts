@@ -11,7 +11,9 @@ import { FieldService,Field } from '../../Services/field.service';
 export class FieldFormComponent {
   router = inject(Router)
   numCount: number = 0;
-  fields: { fieldName: string; stages: string[] }[] = [];
+  fields: { fieldName: string; stages: string[] }[] = [
+    { fieldName: '', stages: [] }
+  ];
   showStages: boolean = false;
   currentFieldIndex: number = 0;
   stageCount: number = 0;
@@ -51,18 +53,14 @@ export class FieldFormComponent {
   }
   saveFields() {
     if (this.allFieldsFilled() && this.allStagesFilled()) {
-      // Retrieve existing fields from localStorage
-      const existingFields = JSON.parse(localStorage.getItem('kanbanFields') || '[]');
+      // Use the service to add fields instead of modifying localStorage directly
+      this.kanbanService.addFields(this.fields);
   
-      // Merge new fields with existing ones
-      const updatedFields = [...existingFields, ...this.fields];
-  
-      // Save updated fields to localStorage
-      localStorage.setItem('kanbanFields', JSON.stringify(updatedFields));
-      this.router.navigateByUrl("")
-      // console.log('Updated Fields:', updatedFields);
+      // Navigate without forcing a reload
+      this.router.navigateByUrl("/");
     }
   }
+  
   
 
   constructor(private kanbanService:FieldService){
