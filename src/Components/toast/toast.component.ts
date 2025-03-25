@@ -5,7 +5,7 @@ import { ToastService } from '../../Services/toast.service';
   selector: 'app-toast',
   imports: [CommonModule],
   templateUrl: './toast.component.html',
-  styleUrl: './toast.component.css'
+  styleUrl: './toast.component.scss'
 })
 export class ToastComponent {
 

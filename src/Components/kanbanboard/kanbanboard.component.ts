@@ -2,38 +2,58 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TaskService } from '../../Services/task.service';
 import { FormsModule } from '@angular/forms';
-import { DragDropModule } from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDropList, DragDropModule } from '@angular/cdk/drag-drop';
+import { ChangeDetectorRef } from '@angular/core';
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { ToastService } from '../../Services/toast.service'; // Import ToastService
 import { DatePipe } from '@angular/common';
 @Component({
   selector: 'app-kanbanboard',
-  imports: [FormsModule, DragDropModule,DatePipe],
+  imports: [FormsModule, DragDropModule, DatePipe],
   templateUrl: './kanbanboard.component.html',
-  styleUrls: ['./kanbanboard.component.css']
+  styleUrls: ['./kanbanboard.component.scss']
 })
 export class KanbanboardComponent implements OnInit {
-  fieldName: string = '';
-  stages: string[] = [];
-  tasks: any[] = [];
-  connectedDropLists: string[] = [];
-  selectedPriority: string = '';
-  showTaskForm: boolean = false;
-  isEdit: boolean = false;
-  allowedTransitions: { [key: string]: string[] } = {}; // Store allowed transitions
-  newTask: Task = {
-    id: 0,
-    title: '',
-    description: '',
-    stage: '',
-    priority: 'Low',
-    dueDate: ''
-  };
+
+// Fields related to task management
+fieldName: string = '';
+stages: string[] = [];
+tasks: any[] = [];
+connectedDropLists: string[] = [];
+
+// Task-related properties
+newTask: Task = {
+  id: 0,
+  title: '',
+  description: '',
+  stage: '',
+  priority: 'Low',
+  dueDate: '',
+  assignedTo: ''
+};
+draggedTask: any | null = null;
+draggedStage: string | null = null; 
+// Task form and editing states
+showTaskForm: boolean = false;
+isEdit: boolean = false;
+
+// Transition properties
+allowedTransitions: { [key: string]: string[] } = {}; // Store allowed transitions
+
+// User-related properties
+isAdmin: boolean = true;
+
+// Dragging state
+isDragging: boolean = false;
+
+// Priority and selection
+selectedPriority: string = '';
 
   constructor(
     private route: ActivatedRoute,
     private taskService: TaskService,
-    private toastService: ToastService // Inject ToastService
+    private toastService: ToastService, // Inject ToastService
+    private cdr:ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -41,7 +61,6 @@ export class KanbanboardComponent implements OnInit {
     this.loadStages();
     this.loadTasks();
     this.setupConnectedDropLists();
-    this.allowedTransitions = this.taskService.getAllowedTransitions(this.fieldName); // Load transitions
   }
 
 
@@ -84,7 +103,7 @@ export class KanbanboardComponent implements OnInit {
       }
     } else {
       this.isEdit = false;
-      this.newTask = { id: 0, title: '', description: '', stage: '', priority: 'Low', dueDate: '' };
+      this.newTask = { id: 0, title: '', description: '', stage: '', priority: 'Low', dueDate: '', assignedTo: '' };
     }
     this.showTaskForm = true;
   }
@@ -94,7 +113,21 @@ export class KanbanboardComponent implements OnInit {
   }
 
   addOrUpdateTask() {
-    if (!this.newTask.title.trim() || !this.newTask.stage) return;
+    if (!this.newTask.title.trim()) {
+      this.toastService.showToast("Title is required!", "danger");
+      return;
+    }
+
+    if (!this.newTask.stage.trim()) {
+      this.toastService.showToast("Stage is required!", "danger");
+      return;
+    }
+
+    if (!this.newTask.assignedTo.trim()) {
+      this.toastService.showToast("Assigned to is required!", "danger");
+      return;
+    }
+
 
     if (this.isEdit) {
       this.taskService.updateTask(this.fieldName, { ...this.newTask });
@@ -121,11 +154,31 @@ export class KanbanboardComponent implements OnInit {
   drop(event: CdkDragDrop<any[]>, stage: string) {
     const draggedItem = event.previousContainer.data[event.previousIndex];
 
-    if (event.previousContainer === event.container) {
-      // ✅ Rearranging within the same column
-      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+    // ❌ If move is invalid, allow CDK to place it but instantly move it back
+    if (draggedItem.stage !== stage &&
+      this.allowedTransitions[draggedItem.stage] &&
+      !this.allowedTransitions[draggedItem.stage].includes(stage)) {
 
-      // ✅ Apply change to the main `tasks` array
+        this.toastService.showToast(
+          `Invalid move! You can only drop the task in highlighted stages.`,
+          "warning", 
+          5000
+        );
+        
+
+      // 🔥 Allow CDK to place it, then return it instantly
+      setTimeout(() => {
+        event.previousContainer.data.splice(event.previousIndex, 0, draggedItem); // Restore to original position
+        event.container.data.splice(event.currentIndex, 1); // Remove from invalid column
+        this.tasks = [...this.tasks]; // Force UI refresh to prevent glitches
+      }, 50); // Small delay to avoid visual flicker
+
+      return;
+    }
+
+    // ✅ If rearranging within the same column, move normally
+    if (event.previousContainer === event.container) {
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
       const sameStageTasks = this.tasks.filter(task => task.stage === draggedItem.stage);
 
       const draggedIndexInTasks = this.tasks.findIndex(task => task.id === draggedItem.id);
@@ -138,12 +191,7 @@ export class KanbanboardComponent implements OnInit {
         this.tasks = updatedTasks;
       }
     } else {
-      // ✅ Moving across different columns
-      if (this.allowedTransitions[draggedItem.stage] && !this.allowedTransitions[draggedItem.stage].includes(stage)) {
-        this.toastService.showToast(`Cannot move directly from ${draggedItem.stage} to ${stage}.`, "warning");
-        return;
-      }
-
+      // ✅ If moving between valid columns, apply the move
       transferArrayItem(
         event.previousContainer.data,
         event.container.data,
@@ -152,23 +200,11 @@ export class KanbanboardComponent implements OnInit {
       );
 
       event.container.data[event.currentIndex].stage = stage;
-
-      // ✅ Update main task array
-      this.tasks = this.tasks.map(task =>
-        task.id === draggedItem.id ? { ...task, stage } : task
-      );
-      this.toastService.showToast(`Task moved to ${stage}!`, "info");
     }
 
     this.taskService.saveTasks(this.fieldName, this.tasks);
   }
 
-
-
-  toggleTransition(stage: string, otherStage: string) {
-    this.taskService.toggleTransition(this.fieldName, stage, otherStage);
-    this.allowedTransitions = this.taskService.getAllowedTransitions(this.fieldName); // Refresh UI
-  }
   getFilteredTasks(stage: string) {
     let tasks = this.getTasksForStage(stage);
     if (this.selectedPriority) {
@@ -178,37 +214,60 @@ export class KanbanboardComponent implements OnInit {
   }
   getDueStatus(dueDate: string | null | undefined): string {
     if (!dueDate) return "No Due Date";
-  
+
     const today = new Date();
     const due = new Date(dueDate);
-  
+
     // Reset time to midnight for accurate date-only comparison
     today.setHours(0, 0, 0, 0);
     due.setHours(0, 0, 0, 0);
-  
+
     if (due < today) return "Overdue";
     if (due.getTime() === today.getTime()) return "Due Today";
-    
+
     return "Upcoming";
   }
-  
+
 
   getBadgeClass(dueDate: string | null | undefined): string {
     if (!dueDate) return "badge-secondary"; // Default gray badge
-  
+
     const today = new Date();
     const due = new Date(dueDate);
-  
+
     // Reset time to midnight for accurate date-only comparison
     today.setHours(0, 0, 0, 0);
     due.setHours(0, 0, 0, 0);
-  
+
     if (due < today) return "badge-danger"; // Overdue: Red badge
     if (due.getTime() === today.getTime()) return "badge-warning"; // Due Today: Yellow badge
-  
+
     return "badge-success"; // Upcoming: Green badge
   }
+ onDragStart(task:any) {
+  this.isDragging = true; 
+  this.draggedTask = task;
+  this.draggedStage = task.stage;
+}
+
+// Reset when dragging ends
+onDragEnd() {
+    this.isDragging = false; 
+    this.draggedTask = null;
+    this.draggedStage = null
+
+  }
+  isStageAllowed(stage: string): boolean {
+    if (!this.draggedTask) return false;
+
   
+    // ✅ Only allow highlighted transitions
+    return this.allowedTransitions[this.draggedTask.stage]?.includes(stage) ?? false;
+  }
+  
+  
+  
+
 }
 
 interface Task {
@@ -218,4 +277,6 @@ interface Task {
   stage: string;
   priority: string;
   dueDate?: string;
+  assignedTo: string;  // Add this property
 }
+

@@ -1,0 +1,403 @@
+// Flexbox Mixins
+@mixin flex-container(
+  $direction: row, 
+  $justify: flex-start, 
+  $align: stretch, 
+  $wrap: nowrap, 
+  $gap: null,
+  $grow: 0  // Added $grow parameter
+) {
+  display: flex;
+  flex-direction: $direction;
+  justify-content: $justify;
+  align-items: $align;
+  flex-wrap: $wrap;
+  flex-grow: $grow;  // Added flex-grow property
+
+  @if $gap != null {
+    gap: $gap;
+  }
+}
+
+@mixin flex-item(
+  $grow: 0, 
+  $shrink: 1, 
+  $basis: auto, 
+  $align-self: auto
+) {
+  flex-grow: $grow;
+  flex-shrink: $shrink;
+  flex-basis: $basis;
+  align-self: $align-self;
+}
+
+@mixin flex-center {
+  @include flex-container(
+    $direction: row, 
+    $justify: center, 
+    $align: center
+  );
+}
+
+@mixin flex-column-center {
+  @include flex-container(
+    $direction: column, 
+    $justify: center, 
+    $align: center
+  );
+}
+
+@mixin flex-space-between {
+  @include flex-container(
+    $direction: row, 
+    $justify: space-between, 
+    $align: center
+  );
+}
+/* Main container styling */
+.kanban-container {
+  background-color: #edf0f5 !important;
+  min-height: 100vh;
+  padding: 2rem;
+  box-shadow: inset 0 0 30px rgba(0,0,0,0.05);
+}
+
+.kanban-title {
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.15);
+}
+
+/* Stage card styling */
+.stage-card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05);
+  transition: transform 0.2s ease;
+  overflow: hidden;
+  height: 100%;
+  background-color: #f8f9fa;
+  outline: 1px solid rgba(0,0,0,0.05);
+
+  @include flex-container(
+    $direction: column, 
+    $justify: flex-start, 
+    $align: stretch
+  );
+  height: auto; /* Ensure it grows dynamically */
+}
+
+.stage-header {
+  border-radius: 8px 8px 0 0;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 1rem !important;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+
+  // Extended color scheme for stage headers
+  @for $i from 0 through 14 {
+    &-#{$i} {
+      $colors: (
+        0: (#4b6cb7, #182848),
+        1: (#1d976c, #2a5298),
+        2: (#8e44ad, #614385),
+        3: (#e74c3c, #c0392b),
+        4: (#f39c12, #d35400),
+        5: (#3498db, #2980b9),
+        6: (#16a085, #27ae60),
+        7: (#9b59b6, #8e44ad),
+        8: (#34495e, #2c3e50),
+        9: (#f1c40f, #f39c12),
+        10: (#00b894, #00a885),
+        11: (#fd79a8, #e84393),
+        12: (#6c5ce7, #5758BB),
+        13: (#fdcb6e, #f6b93b),
+        14: (#0984e3, #0069d9)
+      );
+
+      $gradient-start: nth(map-get($colors, $i), 1);
+      $gradient-end: nth(map-get($colors, $i), 2);
+      background: linear-gradient(135deg, $gradient-start, $gradient-end);
+    }
+  }
+}
+
+.stage-body {
+  background-color: #f0f2f5;
+  padding: 1.25rem;
+  border-radius: 0 0 8px 8px;
+  border-top: 1px solid rgba(0,0,0,0.03);
+  
+  @include flex-container(
+    $direction: column, 
+    $justify: flex-start, 
+    $align: stretch,
+    $grow: 1
+  );
+  min-height: 400px; /* Ensures column remains stable */
+}
+
+/* Task list styling */
+.task-list {
+  min-height: 350px;
+  padding: 0.5rem;
+  position: relative; 
+  background-color: rgba(255,255,255,0.4);
+  border-radius: 8px;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.03);
+}
+
+/* Task item styling */
+.task-item {
+  min-height: auto;
+  border-radius: 8px;
+  border: none;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.02);
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  transition: all 0.2s ease;
+  background-color: #cacccc;
+  position: relative;
+  border-left: 4px solid #677bab;
+
+  &:hover {
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.03);
+    transform: translateY(-2px);
+  }
+
+  &[data-priority="High"] {
+    border-left: 4px solid #e74c3c;
+  }
+
+  &[data-priority="Medium"] {
+    border-left: 4px solid #f39c12;
+  }
+
+  &[data-priority="Low"] {
+    border-left: 4px solid #27ae60;
+  }
+}
+
+.task-title {
+  font-size: 1.1rem;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.task-description {
+  color: #5d6778;
+  font-size: 0.9rem;
+}
+
+/* Priority badges */
+@mixin priority-badge($bg-color) {
+  background-color: $bg-color;
+  padding: 0.4rem 0.8rem;
+  font-weight: 500;
+  box-shadow: 0 2px 5px rgba($bg-color, 0.3);
+}
+
+.priority-badge {
+  &-high { @include priority-badge(#e74c3c); }
+  &-medium { @include priority-badge(#f39c12); }
+  &-low { @include priority-badge(#27ae60); }
+}
+
+/* Task action buttons */
+.edit-btn {
+  background-color: #f1c40f;
+  border: none;
+  color: white;
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+  box-shadow: 0 2px 5px rgba(241, 196, 15, 0.3);
+}
+
+.delete-btn {
+  background-color: #e74c3c;
+  border: none;
+  color: white;
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+  box-shadow: 0 2px 5px rgba(231, 76, 60, 0.3);
+}
+
+/* Empty placeholder styling */
+.empty-placeholder {
+  padding: 1rem;
+  min-height: 80px;
+  @include flex-center;
+  background-color: rgba(255,255,255,0.7);
+  border: 2px dashed #b8c2cc;
+  border-radius: 8px;
+  text-align: center;
+  color: #7f8c8d;
+  box-shadow: inset 0 0 15px rgba(0,0,0,0.03);
+}
+
+/* Floating action button */
+.floating-action-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
+  @include flex-center;
+  font-size: 1.5rem;
+  box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4), 0 0 0 1px rgba(52, 152, 219, 0.1);
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  border: none;
+  z-index: 1000;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(52, 152, 219, 0.5), 0 0 0 1px rgba(52, 152, 219, 0.1);
+  }
+}
+
+/* Custom modal styling */
+.custom-modal {
+  background-color: rgba(0,0,0,0.7);
+
+  &-content {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3), 0 0 0 1px rgba(0,0,0,0.05);
+    overflow: hidden;
+  }
+
+  &-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #eaeaea;
+    padding: 1.25rem;
+  }
+
+  &-body {
+    padding: 1.5rem;
+    background-color: white;
+  }
+
+  &-footer {
+    border-top: 1px solid #eaeaea;
+    padding: 1.25rem;
+    background-color: #f8f9fa;
+  }
+}
+
+/* Form controls */
+%form-control {
+  border: 1px solid #dde1e5;
+  border-radius: 6px;
+  padding: 0.75rem;
+  transition: all 0.2s ease;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.07);
+  background-color: #fcfcfc;
+
+  &:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2), inset 0 2px 5px rgba(0,0,0,0.03);
+    outline: none;
+    background-color: white;
+  }
+}
+
+.custom-input, 
+.custom-textarea, 
+.custom-select {
+  @extend %form-control;
+}
+
+/* Button styling */
+@mixin custom-button($bg-color) {
+  background: linear-gradient(135deg, nth($bg-color, 1), nth($bg-color, 2));
+  border: none;
+  box-shadow: 0 4px 10px rgba(nth($bg-color, 1), 0.3);
+  border-radius: 6px;
+  font-weight: 500;
+
+  &:hover {
+    box-shadow: 0 6px 15px rgba(nth($bg-color, 1), 0.4);
+    transform: translateY(-2px);
+  }
+}
+
+.custom-btn {
+  &-save {
+    @include custom-button((#67aede, #2980b9));
+  }
+
+  &-cancel {
+    border-radius: 6px;
+    font-weight: 500;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+
+    &:hover {
+      background-color: #a0a1a2;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+    }
+  }
+}
+
+/* Due date styling */
+.due-date {
+  background-color: #ecf0f1;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  @include flex-container(
+    $direction: row, 
+    $align: center
+  );
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+  border: 1px solid rgba(0,0,0,0.03);
+}
+
+/* Additional styling for better contrast */
+.row.g-4 {
+  margin-left: -1rem;
+  margin-right: -1rem;
+}
+
+.col-md-4 {
+  padding: 1rem;
+}
+
+/* Badge styling */
+@mixin badge-variant($bg-color) {
+  background-color: $bg-color;
+  color: white;
+  font-size: medium;
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+
+.badge {
+  &-secondary { @include badge-variant(gray); }
+  &-danger { @include badge-variant(#e74c3c); }
+  &-warning { @include badge-variant(#f39c12); }
+  &-success { @include badge-variant(#27ae60); }
+}
+
+/* Drag and drop related styles */
+.cdk-drag-placeholder {
+  height: 48px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+.allowed-transition {
+  width: 100%;
+  border: 2px dashed #1a6ba1 !important;
+  background-color: rgba(40, 167, 69, 0.1);
+  transition: all 0.2s ease-in-out;
+}
+
+.hidden-column {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.dragging {
+  opacity: 0;
+}

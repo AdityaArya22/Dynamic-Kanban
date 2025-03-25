@@ -1,48 +1,91 @@
 <div class="container my-5">
   <div class="row justify-content-center">
-    <div class="col-md-6">
-      <div class="card p-4 shadow-lg rounded">
-        <h3 class="text-center mb-4">📌 Create Your Kanban Fields</h3>
+    <div class="col-md-8 col-lg-6">
+      <div class="card p-4 shadow-sm rounded">
+        <h3 class="text-center mb-4">Create Your Kanban Fields</h3>
 
-        <!-- Instead of an input, just show a text label -->
-        <p class="fw-bold text-center">You can create only **one** field.</p>
-      </div>
-    </div>
-  </div>
+        <!-- Field Name Section -->
+        <h5 class="text-center mb-3">Enter Field Name</h5>
+        <input type="text" name="field" [(ngModel)]="fields[0].fieldName" class="form-control" placeholder="Enter field name" required>
+        <button class="btn btn-outline-primary mt-3 w-100" (click)="proceedToStages(0)">Add Stages</button>
 
-  <div class="mt-4">
-    <div class="row justify-content-center">
-      <div class="col-md-6">
-        <div class="card p-4 shadow-lg rounded">
-          <h5 class="text-center mb-3">✏️ Enter Field Name</h5>
+        <!-- Stages Section -->
+        @if(showStages) {
+          <h5 class="mt-4 text-center">Stages for: <b>{{ fields[currentFieldIndex]?.fieldName }}</b></h5>
 
-          <!-- Single Field Input -->
-          <div class="mb-3">
-            <input type="text" name="field" [(ngModel)]="fields[0].fieldName" class="form-control" placeholder="Enter field name">
-            <button class="btn btn-outline-primary mt-2 w-100" (click)="proceedToStages(0)">➕ Add Stages</button>
-          </div>
+          <label class="form-label">Enter Number of Stages:</label>
+          <input type="number" [(ngModel)]="stageCount" class="form-control" required>
+          <button class="btn btn-secondary w-100 mt-2" (click)="setStageCount()" [disabled]="stageCount < 2">Next</button>
 
-          <!-- Stages Section -->
-          @if(showStages) {
-            <h5 class="mt-4 text-center">📌 Stages for: <b>{{ fields[currentFieldIndex]?.fieldName }}</b></h5>
-
-            <!-- Stage Count Input -->
-            <label class="form-label">Enter Number of Stages:</label>
-            <input type="number" name="stageCount" [(ngModel)]="stageCount" class="form-control">
-            <button class="btn btn-secondary w-100 mt-2" (click)="setStageCount()" [disabled]="stageCount < 1">Next</button>
-
-            <!-- Stage Name Inputs -->
-            @if(stageInputVisible) {
-              @for(item of fields[currentFieldIndex].stages; track $index) {
-                <input type="text" name="fileds" class="form-control my-2" placeholder="Enter stage name" [(ngModel)]="fields[currentFieldIndex].stages[$index]">
-              }
-              <button class="btn btn-warning w-100 mt-2" (click)="saveStages()">✅ Save Stages</button>
+          @if(stageInputVisible) {
+            @for(item of fields[currentFieldIndex].stages; track $index) {
+              <input type="text" class="form-control my-2" placeholder="Enter stage name" [(ngModel)]="fields[currentFieldIndex].stages[$index]" required>
             }
           }
 
-          <button class="btn btn-success w-100 mt-3" (click)="saveFields()" 
-            [disabled]="!allFieldsFilled() || !allStagesFilled()">💾 Save</button>
-        </div>
+          <button class="btn btn-primary w-100 mt-3" (click)="proceedToTaskFields()">Next: Define Task Fields</button>
+        }
+
+        <!-- Task Fields Section -->
+        @if(showTaskFields) {
+          <h5 class="mt-4 text-center">Task Form Fields</h5>
+
+          @for(field of fields[currentFieldIndex].taskFields; track $index) {
+            <div class="mb-3">
+              <input type="text" class="form-control" [(ngModel)]="field.name" placeholder="Field Name">
+              <select class="form-select mt-2" [(ngModel)]="field.type">
+                @for(option of fieldTypes; track $index) {
+                  <option [value]="option">{{ option }}</option>
+                }
+              </select>
+
+              @if(field.type === 'Select') {
+                <div class="mt-2">
+                  <label>How many options?</label>
+                  <input type="number" class="form-control my-1" [(ngModel)]="field.optionCount" min="1">
+              
+                  <button class="btn btn-secondary w-100 mt-2" (click)="generateOptions(field)" [disabled]="!field.optionCount || field.optionCount < 1">
+                    Generate Options
+                  </button>
+              
+                  @for(option of field.options; let id = $index; track id) {
+                    <input type="text" class="form-control my-1" [(ngModel)]="field.options[id]" placeholder="Dropdown Option">
+                  }
+                </div>
+              }
+
+              <button class="btn btn-sm btn-danger mt-2" (click)="removeTaskField($index)">Remove</button>
+            </div>
+          }
+
+          <button class="btn btn-outline-success w-100" (click)="addTaskField()">+ Add Task Field</button>
+
+          <!-- Allowed Transitions Section -->
+          <div class="mt-4">
+            <h5 class="text-center">Allowed Transitions</h5>
+            <div class="row">
+              @for(stage of fields[currentFieldIndex].stages; track $index) {
+                <div class="col-md-4">
+                  <label class="fw-bold">{{ stage }}</label>
+                  <div class="d-flex flex-wrap">
+                    @for(otherStage of fields[currentFieldIndex].stages; track $index) {
+                      <div class="form-check me-2">
+                        <input class="form-check-input" type="checkbox"
+                          [checked]="fields[currentFieldIndex].allowedTransitions?.[stage]?.includes(otherStage)"
+                          (change)="toggleTransition(currentFieldIndex, stage, otherStage)"
+                          [disabled]="otherStage === stage">
+                        <label class="form-check-label">{{ otherStage }}</label>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <button class="btn btn-success w-100 mt-3" (click)="saveFields()" 
+          [disabled]="!allFieldsFilled() || !allStagesFilled() || !allTaskFieldsFilled() || stageCount < 2">Save</button>
       </div>
     </div>
   </div>

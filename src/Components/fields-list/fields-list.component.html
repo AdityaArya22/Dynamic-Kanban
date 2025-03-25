@@ -1,13 +1,13 @@
 <div class="container mt-4">
-  <h2 class="text-center">📌 Select a Field</h2>
+  <h2 class="text-center title">📌 Select a Field</h2>
   
   <div class="row">
     @for(field of fields; track $index) {
-      <div class="col-md-4">
-        <div class="card p-3 text-center shadow-lg">
-          <h5 class="card-title">{{ field.fieldName }}</h5>
-          <a [routerLink]="['/kanban', field.fieldName]" class="btn btn-success mt-2">📝 Open Kanban</a>
-          <button class="btn btn-danger mt-2" (click)="deleteField($index)">❌ Delete</button>
+      <div class="col-md-4 mb-4">
+        <div class="card p-3 text-center shadow-lg custom-card">
+          <h5 class="card-title card-heading">{{ field.fieldName }}</h5>
+          <a [routerLink]="['/kanban', field.fieldName]" class="btn btn-success mt-2 custom-btn">📝 Open Kanban</a>
+          <button class="btn btn-danger mt-2 custom-btn-danger" (click)="deleteField($index)">❌ Delete</button>
         </div>
       </div>
     }

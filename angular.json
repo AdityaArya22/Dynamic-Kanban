@@ -5,7 +5,11 @@
   "projects": {
     "dynamicKanban": {
       "projectType": "application",
-      "schematics": {},
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
@@ -28,7 +32,7 @@
             ],
            "styles": [
   "node_modules/bootstrap/dist/css/bootstrap.min.css",
-  "src/styles.css"
+  "src/styles.scss"
 ]
 ,
             "scripts": [  "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"]
@@ -87,7 +91,7 @@
               }
             ],
             "styles": [
-              "src/styles.css"
+              "src/styles.scss"
             ],
             "scripts": []
           }

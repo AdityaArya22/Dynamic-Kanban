@@ -6,7 +6,7 @@ import { RouterLink } from '@angular/router';
   selector: 'app-fields-list',
   imports: [RouterLink],
   templateUrl: './fields-list.component.html',
-  styleUrl: './fields-list.component.css'
+  styleUrl: './fields-list.component.scss'
 })
 export class FieldsListComponent implements OnInit {
   fields: Field[] = [];
