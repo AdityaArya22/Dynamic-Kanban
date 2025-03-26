@@ -60,6 +60,7 @@ selectedPriority: string = '';
     this.fieldName = this.route.snapshot.paramMap.get('fieldName') || "";
     this.loadStages();
     this.loadTasks();
+    this.loadAllowedTransitions()
     this.setupConnectedDropLists();
   }
 
@@ -76,9 +77,15 @@ selectedPriority: string = '';
   }
 
   loadAllowedTransitions() {
-    const storedTransitions = localStorage.getItem(`transitions-${this.fieldName}`);
+    console.log(this.fieldName);
+    
+    const storedTransitions = localStorage.getItem(`transitions_${this.fieldName}`);
+    console.log(storedTransitions);
+    
     if (storedTransitions) {
       this.allowedTransitions = JSON.parse(storedTransitions);
+      console.log(this.allowedTransitions);
+      
     }
   }
 
@@ -260,7 +267,8 @@ onDragEnd() {
   isStageAllowed(stage: string): boolean {
     if (!this.draggedTask) return false;
 
-  
+ console.log( this.allowedTransitions[this.draggedTask.stage]?.includes(stage) );
+ 
     // ✅ Only allow highlighted transitions
     return this.allowedTransitions[this.draggedTask.stage]?.includes(stage) ?? false;
   }
