@@ -266,7 +266,10 @@ onDragEnd() {
   }
   
   
-  
+  toggleTransition(stage: string, otherStage: string) {
+    this.taskService.toggleTransition(this.fieldName, stage, otherStage);
+    this.allowedTransitions = this.taskService.getAllowedTransitions(this.fieldName); // Refresh UI
+  }
 
 }
 
