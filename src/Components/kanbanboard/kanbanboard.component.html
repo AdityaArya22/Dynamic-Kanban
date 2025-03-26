@@ -9,190 +9,84 @@
     </svg>
   </button>
 
-  @if(showTaskForm) {
-  <div class="modal  fade show d-block custom-modal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered ">
-      <div class="modal-content custom-modal-content">
-        <div class="modal-header  bg-dark text-white custom-modal-header">
-          <h5 class="modal-title">{{ isEdit ? "✏️ Edit Task" : "📌 New Task" }}</h5>
-          <button class="btn-close" (click)="closeTaskForm()"></button>
-        </div>
-        <div class="modal-body bg-dark text-white custom-modal-body">
-          <form>
-            <!-- Task Title -->
-            <div class="mb-3">
-              <label class="form-label fw-bold">Task Title</label>
-              <input type="text" class="form-control custom-input" name="title"
-                [(ngModel)]="newTask.title" placeholder="Enter a descriptive title">
-            </div>
-
-            <!-- Task Description -->
-            <div class="mb-3">
-              <label class="form-label fw-bold">Description</label>
-              <textarea class="form-control custom-textarea" rows="1" name="desc" [(ngModel)]="newTask.description"
-                placeholder="Add details about this task"></textarea>
-            </div>
-
-            <!-- Stage & Priority -->
-            <div class="row mb-3">
-              <div class="col-md-6">
-                <label class="form-label fw-bold">Stage</label>
-                <select class="form-select custom-select" name="dropdown1" [(ngModel)]="newTask.stage" required>
-                  @for(stage of stages; track $index) {
-                  <option [value]="stage">{{ stage }}</option>
-                  }
-                </select>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label fw-bold">Priority</label>
-                <select class="form-select custom-select" name="priority" [(ngModel)]="newTask.priority">
-                  <option value="High">High 🔴</option>
-                  <option value="Medium">Medium 🟡</option>
-                  <option value="Low">Low 🟢</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Due Date -->
-            <div class="mb-3">
-              <label class="form-label fw-bold">Due Date</label>
-              <input type="date" name="date" class="form-control custom-input" [(ngModel)]="newTask.dueDate">
-            </div>
-            <!-- Assigned To (Manual Input) -->
-            <div class="mb-3">
-              <label class="form-label fw-bold">Assigned To</label>
-              <input type="text" class="form-control custom-input" name="assignedTo" [(ngModel)]="newTask.assignedTo"
-                placeholder="Enter assignee's name">
-            </div>
-
-
-            <!-- Allowed Transitions -->
-          <!-- @if(isAdmin){
-            <div class="mb-3 ">
-              <label class="form-label fw-bold">Allowed Transitions</label>
-              <div class="row">
-                @for(stage of stages; track $index) {
-                <div class="col-md-4">
-                  <label class="fw-bold">{{ stage }}</label>
-                  <div class="d-flex flex-wrap">
-                    @for(otherStage of stages; track $index) {
-                    <div class="form-check me-2">
-                      <input class="form-check-input" type="checkbox"
-                        [checked]="allowedTransitions[stage]?.includes(otherStage)"
-                        (change)="toggleTransition(stage, otherStage)" [disabled]="otherStage === stage">
-                      <label class="form-check-label">{{ otherStage }}</label>
-                    </div>
-                    }
-                  </div>
-                </div>
-                }
-              </div>
-            </div>
-          } -->
-          </form>
-        </div>
-
-        <!-- Modal Footer -->
-        <div class="modal-footer bg-dark text-white custom-modal-footer">
-          <button class="btn btn-outline-secondary custom-btn-cancel" (click)="closeTaskForm()">Cancel</button>
-          <button class="btn btn-success px-4 custom-btn-save" (click)="addOrUpdateTask()">
-            {{ isEdit ? "Update" : "Save" }}
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-  }
-
-
+@if(showTaskForm){
+  <app-task-form [taskData]="newTask" (closeForm)="closeTaskForm()"></app-task-form>
+}
   <!-- Kanban Board -->
   <div class="row">
     @for(stage of stages; track $index) {
-    <div class="col-md-4">
-      <div class="card stage-card" >
-        <div class="card-header text-white text-center py-3 stage-header stage-header-{{$index}}">
-          <h5 class="mb-0">{{ stage }}</h5>
-        </div>
-        <div *cdkDragPlaceholder class="kanban-stage-placeholder"></div>
-        <!-- Drop zone -->
-        <div class="card-body p-3 stage-body">
-          <ul class="list-group list-group-flush min-height-zone py-2 task-list" cdkDropList [id]="'dropList-' + stage"
-            [cdkDropListData]="getTasksForStage(stage)" [cdkDropListConnectedTo]="connectedDropLists"
-            (cdkDropListDropped)="drop($event,stage)"
-            [class.allowed-transition]="isStageAllowed(stage) && isDragging"
-            
-            >
-            <!-- Tasks -->
-            @for(task of getTasksForStage(stage); track task.id) {
-            <li class="list-group-item mb-3 task-item" cdkDrag (cdkDragStarted)="onDragStart(task)" (cdkDragEnded)="onDragEnd()" [class.dragging]="isDragging">
-              <div class="position-relative" [class.dragging]="isDragging">
-                <!-- Priority Badge -->
-                <div class="badge-container">
-                  <span class="badge rounded-pill float-end priority-badge-{{task.priority.toLowerCase()}}">
-                    {{ task.priority }}
-                  </span>
-                </div>
+      <div class="col-md-4">
+        <div class="card stage-card">
+          <div class="card-header text-white text-center py-3 stage-header stage-header-{{$index}}">
+            <h5 class="mb-0">{{ stage }}</h5>
+          </div>
+          <div *cdkDragPlaceholder class="kanban-stage-placeholder"></div>
   
-                <h6 class="card-title mt-2 mb-2 fw-bold task-title">{{ task.title }}</h6>
-                <p class="card-text small text-muted mb-3 task-description">{{ task.description }}</p>
+          <div class="card-body p-3 stage-body">
+            <ul class="list-group list-group-flush min-height-zone py-2 task-list" 
+                cdkDropList [id]="'dropList-' + stage"
+                [cdkDropListData]="getTasksForStage(stage)" 
+                [cdkDropListConnectedTo]="connectedDropLists"
+                (cdkDropListDropped)="drop($event, stage)">
+              
+              @for(task of getTasksForStage(stage); track task.id) {
+                <li class="list-group-item mb-3 task-item" cdkDrag (cdkDragStarted)="onDragStart(task)" (cdkDragEnded)="onDragEnd()" [class.dragging]="isDragging">
+                  <div class="position-relative">
+                    
+                    <!-- Task Title -->
+                    <h6 class="card-title mt-2 mb-2 fw-bold">{{ task.title }}</h6>
   
-                <!-- Due Date -->
-                <div class="d-flex align-items-center small text-muted mb-2 due-date">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="me-1"
-                    viewBox="0 0 16 16">
-                    <path
-                      d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z" />
-                  </svg>
+                    <!-- Dynamic Fields -->
+                     @for(field of taskFields; track $index){
+                     
+                      <div>
+                        <p class="task-attribute">
+                          <strong>{{ formatLabel(field) }}:</strong> {{ task[field] || 'N/A' }}
+                        </p>
+                      </div>
+                     }
+                   
   
-                  <span class="me-2">{{ task.dueDate ? (task.dueDate | date: 'dd/MM/yyyy') : 'No Due Date' }}</span>
+                    <!-- Actions with SVGs -->
+                    <div class="d-flex justify-content-end mt-3 task-actions">
+                      <button class="btn btn-sm edit-btn me-2" (click)="openTaskForm(task.id)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                          viewBox="0 0 16 16">
+                          <path
+                            d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z" />
+                        </svg>
+                      </button>
+                      <button class="btn btn-sm delete-btn" (click)="deleteTask(task.id)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                          viewBox="0 0 16 16">
+                          <path
+                            d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" />
+                          <path fill-rule="evenodd"
+                            d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z" />
+                        </svg>
+                      </button>
+                    </div>
   
-                  @if(task.dueDate){
-                  <span class="badge px-3 py-1" [class]="getBadgeClass(task.dueDate)">
-                    {{ getDueStatus(task.dueDate) }}
-                  </span>
-                  }
-                </div>
-  
-                <p><strong>Assigned To:</strong> {{ task.assignedTo || 'Not Assigned' }}</p> 
-                <!-- Actions -->
-                <div class="d-flex justify-content-end mt-3 task-actions">
-                  <button class="btn btn-sm edit-btn me-2" (click)="openTaskForm(task.id)">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                      viewBox="0 0 16 16">
+                  </div>
+                </li>
+              }@empty {
+                <li class="list-group-item empty-placeholder position-absolute" [class.dragging]="isDragging">
+                  <p class="text-muted mb-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor"
+                      class="d-block mx-auto mb-2" viewBox="0 0 16 16">
                       <path
-                        d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z" />
+                        d="M4.98 4a.5.5 0 0 0-.39.188L1.54 8H6a.5.5 0 0 1 .5.5 1.5 1.5 0 1 0 3 0A.5.5 0 0 1 10 8h4.46l-3.05-3.812A.5.5 0 0 0 11.02 4H4.98zm-1.17-.437A1.5 1.5 0 0 1 4.98 3h6.04a1.5 1.5 0 0 1 1.17.563l3.7 4.625a.5.5 0 0 1 .106.374l-.39 3.124A1.5 1.5 0 0 1 14.117 13H1.883a1.5 1.5 0 0 1-1.489-1.314l-.39-3.124a.5.5 0 0 1 .106-.374l3.7-4.625z" />
                     </svg>
-                  </button>
-                  <button class="btn btn-sm delete-btn" (click)="deleteTask(task.id)">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                      viewBox="0 0 16 16">
-                      <path
-                        d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" />
-                      <path fill-rule="evenodd"
-                        d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z" />
-                    </svg>
-                  </button>
-                </div>
-            </div>
-           
-            </li>
-            }
-            @empty {
-            <li class="list-group-item empty-placeholder position-absolute" [class.dragging]="isDragging">
-              <p class="text-muted mb-0">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor"
-                  class="d-block mx-auto mb-2" viewBox="0 0 16 16">
-                  <path
-                    d="M4.98 4a.5.5 0 0 0-.39.188L1.54 8H6a.5.5 0 0 1 .5.5 1.5 1.5 0 1 0 3 0A.5.5 0 0 1 10 8h4.46l-3.05-3.812A.5.5 0 0 0 11.02 4H4.98zm-1.17-.437A1.5 1.5 0 0 1 4.98 3h6.04a1.5 1.5 0 0 1 1.17.563l3.7 4.625a.5.5 0 0 1 .106.374l-.39 3.124A1.5 1.5 0 0 1 14.117 13H1.883a1.5 1.5 0 0 1-1.489-1.314l-.39-3.124a.5.5 0 0 1 .106-.374l3.7-4.625z" />
-                </svg>
-                No tasks yet. Drag a task here!
-              </p>
-            </li>
-            }
-          </ul>
+                    No tasks yet. Drag a task here!
+                  </p>
+                </li>
+                }
+              
+            </ul>
+          </div>
         </div>
       </div>
-    </div>
     }
   </div>
+  
 </div>

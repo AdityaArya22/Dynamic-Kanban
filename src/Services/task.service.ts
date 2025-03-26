@@ -10,9 +10,6 @@ export class TaskService {
     return `tasks_${fieldName}`;
   }
 
-  private transitionKey(fieldName: string) {
-    return `transitions_${fieldName}`;
-  }
 
   addTask(fieldName: string, task: any) {
     let tasks = this.getTasks(fieldName);
@@ -22,8 +19,10 @@ export class TaskService {
 
     this.saveTasks(fieldName, tasks);
   }
-
+  
   getTasks(fieldName: string): any[] {
+    console.log(this.taskKey(fieldName));
+    
     return JSON.parse(localStorage.getItem(this.taskKey(fieldName)) || '[]');
   }
 

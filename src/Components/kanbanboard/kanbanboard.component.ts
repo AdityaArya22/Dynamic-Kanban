@@ -7,30 +7,22 @@ import { ChangeDetectorRef } from '@angular/core';
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { ToastService } from '../../Services/toast.service'; // Import ToastService
 import { DatePipe } from '@angular/common';
+import { TaskFormComponent } from "../task-form/task-form.component";
 @Component({
   selector: 'app-kanbanboard',
-  imports: [FormsModule, DragDropModule, DatePipe],
+  imports: [FormsModule, DragDropModule, DatePipe, TaskFormComponent],
   templateUrl: './kanbanboard.component.html',
   styleUrls: ['./kanbanboard.component.scss']
 })
 export class KanbanboardComponent implements OnInit {
-
 // Fields related to task management
 fieldName: string = '';
 stages: string[] = [];
 tasks: any[] = [];
 connectedDropLists: string[] = [];
-
+taskFields:any[] = []
 // Task-related properties
-newTask: Task = {
-  id: 0,
-  title: '',
-  description: '',
-  stage: '',
-  priority: 'Low',
-  dueDate: '',
-  assignedTo: ''
-};
+
 draggedTask: any | null = null;
 draggedStage: string | null = null; 
 // Task form and editing states
@@ -48,7 +40,7 @@ isDragging: boolean = false;
 
 // Priority and selection
 selectedPriority: string = '';
-
+selectedTask: any = null
   constructor(
     private route: ActivatedRoute,
     private taskService: TaskService,
@@ -58,28 +50,43 @@ selectedPriority: string = '';
 
   ngOnInit(): void {
     this.fieldName = this.route.snapshot.paramMap.get('fieldName') || "";
+    this.loadAllowedTransitions()
     this.loadStages();
     this.loadTasks();
     this.setupConnectedDropLists();
   }
 
 
-
+  initializeNewTask():any {
+    const storedFields = JSON.parse(localStorage.getItem('taskFields') || '[]');
+  
+    let newTask: any = { id: 0 };
+  
+    storedFields.forEach((field: string) => {
+      newTask[field] = ''; // Default empty values for all dynamic fields
+    });
+  
+    return newTask;
+  }
+  
+  // Usage in your component:
+  newTask:any = this.initializeNewTask();
+  
 
   loadStages() {
     const storedFields = localStorage.getItem('kanbanFields');
     if (storedFields) {
       const fields = JSON.parse(storedFields);
       const selectedField = fields.find((f: any) => f.fieldName === this.fieldName);
+      console.log(selectedField);
+      
       this.stages = selectedField ? selectedField.stages || [] : [];
     }
   }
 
   loadAllowedTransitions() {
-    const storedTransitions = localStorage.getItem(`transitions-${this.fieldName}`);
-    if (storedTransitions) {
-      this.allowedTransitions = JSON.parse(storedTransitions);
-    }
+    console.log(this.taskFields);
+    
   }
 
   refreshBoard() {
@@ -87,8 +94,21 @@ selectedPriority: string = '';
   }
 
   loadTasks() {
-    this.tasks = this.taskService.getTasks(this.fieldName);
+    this.tasks = this.taskService.getTasks(this.fieldName) || [];
+    console.log(this.tasks);
+    // Filter out objects that have only an "id" field (invalid tasks)
+    const validTasks = this.tasks.filter(task => Object.keys(task).length > 1);
+  
+    if (validTasks.length > 0) {
+      this.taskFields = Object.keys(validTasks[0]); 
+    } else {
+      this.taskFields = [];
+    }
+  
+    this.cdr.detectChanges(); // Force UI update
   }
+  
+  
 
   setupConnectedDropLists() {
     this.connectedDropLists = this.stages.map(stage => `dropList-${stage}`);
@@ -97,19 +117,22 @@ selectedPriority: string = '';
   openTaskForm(taskID?: number) {
     if (taskID !== undefined) {
       const taskToEdit = this.tasks.find((task: any) => task.id === taskID);
+      console.log(taskToEdit);
+      
       if (taskToEdit) {
         this.isEdit = true;
         this.newTask = { ...taskToEdit };
       }
     } else {
       this.isEdit = false;
-      this.newTask = { id: 0, title: '', description: '', stage: '', priority: 'Low', dueDate: '', assignedTo: '' };
+      this.newTask = { };
     }
     this.showTaskForm = true;
   }
 
   closeTaskForm() {
     this.showTaskForm = false;
+    this.cdr.detectChanges();
   }
 
   addOrUpdateTask() {
@@ -148,8 +171,12 @@ selectedPriority: string = '';
   }
 
   getTasksForStage(stage: string) {
-    return this.tasks.filter(task => task.stage === stage);
+    const filteredTasks = this.tasks.filter(task => task.stage === stage);
+
+    
+    return filteredTasks;
   }
+  
 
   drop(event: CdkDragDrop<any[]>, stage: string) {
     const draggedItem = event.previousContainer.data[event.previousIndex];
@@ -178,27 +205,32 @@ selectedPriority: string = '';
 
     // ✅ If rearranging within the same column, move normally
     if (event.previousContainer === event.container) {
+      console.log(`Before ${event.previousContainer}`);
+      
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
       const sameStageTasks = this.tasks.filter(task => task.stage === draggedItem.stage);
-
+      console.log(`After ${event.container}`);
+      
       const draggedIndexInTasks = this.tasks.findIndex(task => task.id === draggedItem.id);
-
+      
       if (draggedIndexInTasks !== -1) {
         const updatedTasks = [...this.tasks];
         const [movedTask] = updatedTasks.splice(draggedIndexInTasks, 1); // Remove item
         updatedTasks.splice(event.currentIndex, 0, movedTask); // Insert item at new position
-
+        
         this.tasks = updatedTasks;
       }
     } else {
       // ✅ If moving between valid columns, apply the move
+      console.log("Before",event.container.data);
       transferArrayItem(
         event.previousContainer.data,
         event.container.data,
         event.previousIndex,
         event.currentIndex
       );
-
+      console.log("After",event.container.data);
+      
       event.container.data[event.currentIndex].stage = stage;
     }
 
@@ -264,19 +296,16 @@ onDragEnd() {
     // ✅ Only allow highlighted transitions
     return this.allowedTransitions[this.draggedTask.stage]?.includes(stage) ?? false;
   }
+  formatLabel(field: string): string {
+    const formattedField = field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+    return formattedField;
+  }
+  
   
   
   
 
 }
 
-interface Task {
-  id: number;
-  title: string;
-  description: string;
-  stage: string;
-  priority: string;
-  dueDate?: string;
-  assignedTo: string;  // Add this property
-}
+
 

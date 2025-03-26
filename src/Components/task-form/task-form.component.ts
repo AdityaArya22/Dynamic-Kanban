@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Output, Input } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TaskService } from '../../Services/task.service';
 import { FormsModule } from '@angular/forms';
@@ -10,64 +10,79 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./task-form.component.scss']
 })
 export class TaskFormComponent {
-  fieldName: string = ''; // Field name from URL
-  showTaskForm: boolean = false;
+  fieldName: string = '';
   isEdit: boolean = false;
-  taskToEdit: any = null; // Existing task data for editing
+  taskToEdit: any = null;
 
-  newTask: any = {}; // Object to store form data
-  taskFields: any[] = []; // Stores the fields dynamically
-  
-  constructor(private route: ActivatedRoute, private taskService: TaskService) {}
+  newTask: any = {};
+  taskFields: any[] = [];
+  @Input() getStages!: () => string[];  // Function from parent
+  taskStages: string[] = [];
+  @Output() closeForm = new EventEmitter<void>();// Event to notify parent
+  @Input() taskData: any; 
+  constructor(private route: ActivatedRoute, private taskService: TaskService, private cdr: ChangeDetectorRef) { }
 
   ngOnInit() {
-    // Read the field name from route parameters
     this.route.paramMap.subscribe(params => {
       this.fieldName = params.get('fieldName') || '';
-      this.loadTaskFields();
     });
-
+    this.loadTaskFields();
+    console.log(this.taskData);
+    console.log(this.isEdit);
+    
     if (this.isEdit && this.taskToEdit) {
-      this.newTask = { ...this.taskToEdit }; // Load existing task data
+      this.newTask = { ...this.taskToEdit };
     }
   }
 
-  /** Load task fields from localStorage */
   loadTaskFields() {
+    if (!this.fieldName) {
+      console.error('Field name is empty, cannot load task fields.');
+      return;
+    }
+
     const storedKanbanFields = localStorage.getItem('kanbanFields');
     if (storedKanbanFields) {
       const kanbanFields = JSON.parse(storedKanbanFields);
       const selectedField = kanbanFields.find((field: any) => field.fieldName === this.fieldName);
+      this.taskStages = selectedField.stages;
+      console.log(this.taskStages);
 
-      console.log(this.fieldName);
-      if (selectedField) {
+      if (selectedField && selectedField.taskFields) {
         this.taskFields = selectedField.taskFields;
-        
         this.initializeTaskObject();
+      } else {
+        console.warn(`Field "${this.fieldName}" not found in localStorage or taskFields is missing.`);
+        this.taskFields = [];
       }
     }
+
   }
 
   initializeTaskObject() {
-    this.newTask = {}; // Reset task object
+    this.newTask = {};
     this.taskFields.forEach(field => {
-      this.newTask[field.name] = field.type === 'Select' ? field.options[0] : ''; // Default values
+      this.newTask[field.name] = field.type === 'Select' ? field.options[0] : '';
     });
   }
 
-  /** Save or update task */
   addOrUpdateTask() {
+  
     if (this.isEdit) {
       this.taskService.updateTask(this.fieldName, this.newTask);
     } else {
       this.taskService.addTask(this.fieldName, this.newTask);
     }
+    console.log(this.newTask);
+
     this.closeTaskForm();
   }
 
   /** Close modal */
   closeTaskForm() {
-    this.showTaskForm = false;
-    this.newTask = {}; // Reset form
+    this.newTask = {};
+    console.log("🔴 [TaskFormComponent] closeTaskForm() called, emitting closeForm event...");
+    this.closeForm.emit();
   }
+
 }
