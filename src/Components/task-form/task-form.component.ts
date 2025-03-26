@@ -2,7 +2,6 @@ import { ChangeDetectorRef, Component, EventEmitter, Output, Input } from '@angu
 import { ActivatedRoute } from '@angular/router';
 import { TaskService } from '../../Services/task.service';
 import { FormsModule } from '@angular/forms';
-
 @Component({
   selector: 'app-task-form',
   templateUrl: './task-form.component.html',
@@ -16,6 +15,7 @@ export class TaskFormComponent {
 
   newTask: any = {};
   taskFields: any[] = [];
+  tasks:any[]=[]
   @Input() getStages!: () => string[];  // Function from parent
   taskStages: string[] = [];
   @Output() closeForm = new EventEmitter<void>();// Event to notify parent
@@ -46,8 +46,7 @@ export class TaskFormComponent {
       const kanbanFields = JSON.parse(storedKanbanFields);
       const selectedField = kanbanFields.find((field: any) => field.fieldName === this.fieldName);
       this.taskStages = selectedField.stages;
-      console.log(this.taskStages);
-
+  
       if (selectedField && selectedField.taskFields) {
         this.taskFields = selectedField.taskFields;
         this.initializeTaskObject();
@@ -58,7 +57,10 @@ export class TaskFormComponent {
     }
 
   }
-
+  loadTasks() {
+    if (!this.fieldName) return;
+    
+  }
   initializeTaskObject() {
     this.newTask = {};
     this.taskFields.forEach(field => {
@@ -67,6 +69,7 @@ export class TaskFormComponent {
   }
 
   addOrUpdateTask() {
+  // console.log(this.isEdit);
   
     if (this.isEdit) {
       this.taskService.updateTask(this.fieldName, this.newTask);

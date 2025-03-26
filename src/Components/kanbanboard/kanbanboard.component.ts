@@ -298,6 +298,7 @@ onDragEnd() {
   }
   formatLabel(field: string): string {
     const formattedField = field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+    
     return formattedField;
   }
   
