@@ -50,4 +50,28 @@ export class TaskService {
   saveTasks(fieldName: string, tasks: any[]) {
     localStorage.setItem(this.taskKey(fieldName), JSON.stringify(tasks));
   }
+  getAllowedTransitions(fieldName: string): { [key: string]: string[] } {
+    return JSON.parse(localStorage.getItem(this.transitionKey(fieldName)) || '{}');
+  }
+  saveAllowedTransitions(fieldName: string, transitions: { [key: string]: string[] }) {
+    localStorage.setItem(this.transitionKey(fieldName), JSON.stringify(transitions));
+  }
+
+  toggleTransition(fieldName: string, stage: string, otherStage: string) {
+    let transitions = this.getAllowedTransitions(fieldName);
+    
+    if (!transitions[stage]) {
+      transitions[stage] = [];
+    }
+
+    const index = transitions[stage].indexOf(otherStage);
+    
+    if (index === -1) {
+      transitions[stage].push(otherStage);
+    } else {
+      transitions[stage].splice(index, 1);
+    }
+
+    this.saveAllowedTransitions(fieldName, transitions);
+  }
 }
