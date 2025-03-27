@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TaskService } from '../../Services/task.service';
 import { FormsModule } from '@angular/forms';
-import { CdkDrag, CdkDropList, DragDropModule } from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragMove, CdkDropList, DragDropModule } from '@angular/cdk/drag-drop';
 import { ChangeDetectorRef } from '@angular/core';
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { ToastService } from '../../Services/toast.service'; // Import ToastService
@@ -15,6 +15,19 @@ import { DatePipe } from '@angular/common';
 })
 export class KanbanboardComponent implements OnInit {
 
+@ViewChild('kanbanContainer',{static:true}) kanbanContainer!:ElementRef;
+ private scrollSpeed = 20;
+
+ onDragMove(event:CdkDragMove){
+  const container = this.kanbanContainer.nativeElement;
+  const scrollThreshold = 200;
+  const {x} = event.pointerPosition;
+  if (x < container.offsetLeft + scrollThreshold) {
+    container.scrollLeft -= this.scrollSpeed;
+  } else if (x > container.offsetLeft + container.clientWidth - scrollThreshold) {
+    container.scrollLeft += this.scrollSpeed;
+  }
+ }
 // Fields related to task management
 fieldName: string = '';
 stages: string[] = [];
